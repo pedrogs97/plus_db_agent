@@ -29,15 +29,13 @@ def get_database_url(test=False, sqlite=False):
     return f"postgres://{user}:{password}@{server}:{port}/{db}"
 
 
-TORTOISE_ORM = {
+DATABASE_CONFIG = {
     "connections": {"default": get_database_url(sqlite=os.getenv("ENABLE_SQLITE"))},
     "apps": {
         "models": {
             "models": [
                 "aerich.models",
-                "src.clinic_office.models",
-                "src.auth.models",
-                "src.billing.models",
+                "plus_db_agent.models",
             ],
             "default_connection": "default",
         },

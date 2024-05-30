@@ -19,11 +19,17 @@ tortoise-orm = "^0.21.2"
 email-validator = "^2.1.1"
 python-dotenv = "^1.0.1"
 fastapi-filter = "^2.0.0"
+asyncpg = "^0.29.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
 pre-commit = "^3.7.1"
 
+
+[tool.aerich]
+tortoise_orm = "config.DATABASE_CONFIG"
+location = "./migrations"
+src_folder = "./."
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

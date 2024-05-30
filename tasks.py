@@ -18,7 +18,7 @@ def migrate(cmd):
 @task
 def initdb(cmd):
     """Create the database tables."""
-    cmd.run("aerich init -t src.config.TORTOISE_ORM")
+    cmd.run("aerich init -t config.DATABASE_CONFIG")
     cmd.run("aerich init-db")
 
 
@@ -26,6 +26,6 @@ def initdb(cmd):
 def runtest(cmd, file=None):
     """Run tests."""
     if file:
-        cmd.run(f"pytest src/tests/{file}.py")
+        cmd.run(f"pytest tests/{file}.py")
     else:
-        cmd.run("pytest src/tests")
+        cmd.run("pytest tests")
