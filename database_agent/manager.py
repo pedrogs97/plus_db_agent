@@ -3,8 +3,8 @@ import os
 
 from tortoise import Tortoise, connections
 
-from config import DATABASE_CONFIG, bcrypt_context
-from models import ProfileModel, UserModel
+from database_agent.config import DATABASE_CONFIG, bcrypt_context
+from database_agent.models import ProfileModel, UserModel
 
 
 def hash_password(password: str) -> str:
