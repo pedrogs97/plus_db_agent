@@ -10,7 +10,7 @@ from database_agent.repository import GenericRepository
 logger = logging.getLogger(__name__)
 
 
-class GenericService:
+class GenericController:
     """Base service class that will be inherited by all other services"""
 
     model: T
@@ -60,9 +60,13 @@ class GenericService:
         )
         return obj_created
 
-    async def update(self, record: dict, pk: int, authenticated_user: UserModel) -> T:
+    async def update(
+        self, record: dict, pk: int, authenticated_user: UserModel
+    ) -> Union[T, None]:
         """Update an object"""
         obj = await self.get_obj_or_none(pk)
+        if not obj:
+            return None
         obj_updated: T = await self.repository.update(obj, record)
         self.__set_log(
             module=self.module_name,
@@ -96,6 +100,6 @@ class GenericService:
             user=authenticated_user,
         )
 
-    async def get_by_field(self, field: str, value: str) -> T:
+    async def get_by_field(self, field: str, value: str) -> Union[T, None]:
         """Get an object by a field"""
         return await self.repository.get_by_field(field, value)
