@@ -3,13 +3,7 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "aerich" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "version" VARCHAR(255) NOT NULL,
-    "app" VARCHAR(100) NOT NULL,
-    "content" JSONB NOT NULL
-);
-CREATE TABLE IF NOT EXISTS "anamnesis" (
+        CREATE TABLE IF NOT EXISTS "anamnesis" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -257,6 +251,12 @@ CREATE TABLE IF NOT EXISTS "tokens" (
     "user_id" BIGINT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
 );
 COMMENT ON TABLE "tokens" IS 'Model to represent a token.';
+CREATE TABLE IF NOT EXISTS "aerich" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "version" VARCHAR(255) NOT NULL,
+    "app" VARCHAR(100) NOT NULL,
+    "content" JSONB NOT NULL
+);
 CREATE TABLE IF NOT EXISTS "plans_specialties" (
     "plans_id" BIGINT NOT NULL REFERENCES "plans" ("id") ON DELETE CASCADE,
     "specialtymodel_id" BIGINT NOT NULL REFERENCES "specialties" ("id") ON DELETE CASCADE

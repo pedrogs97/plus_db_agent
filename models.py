@@ -4,8 +4,8 @@ from typing import TypeVar
 from tortoise import fields
 from tortoise.models import Model
 
-from database_agent.config import DEFAULT_DATE_TIME_FORMAT
-from database_agent.enums import ActionEnum, GenderEnum, ThemeEnum
+from config import DEFAULT_DATE_TIME_FORMAT
+from enums import ActionEnum, GenderEnum, ThemeEnum
 
 
 class BaseModel(Model):
@@ -41,13 +41,13 @@ class UserModel(BaseModel):
     )
     last_login_in = fields.DatetimeField(null=True)
     profile: fields.ForeignKeyRelation["ProfileModel"] = fields.ForeignKeyField(
-        "models.ProfileModel",
+        "core.ProfileModel",
         related_name="users",
         on_delete=fields.SET_NULL,
         null=True,
     )
     clinic: fields.ForeignKeyRelation["ClinicModel"] = fields.ForeignKeyField(
-        "models.ClinicModel",
+        "core.ClinicModel",
         related_name="users",
         on_delete=fields.SET_NULL,
         null=True,
@@ -65,13 +65,13 @@ class ProfileModel(BaseModel):
 
     name = fields.CharField(max_length=255)
     clinic = fields.ForeignKeyField(
-        "models.ClinicModel",
+        "core.ClinicModel",
         related_name="profiles",
         on_delete=fields.NO_ACTION,
         null=True,
     )
     permissions = fields.ManyToManyField(
-        "models.PermissionModel", related_name="profiles"
+        "core.PermissionModel", related_name="profiles"
     )
 
     def __str__(self):
@@ -102,13 +102,13 @@ class ClinicModel(BaseModel):
     """Model to represent a clinic."""
 
     head_quarter: fields.ForeignKeyRelation["ClinicModel"] = fields.ForeignKeyField(
-        "models.ClinicModel",
+        "core.ClinicModel",
         related_name="subsidiaries",
         on_delete=fields.NO_ACTION,
         null=True,
     )
     license: fields.ForeignKeyRelation["LicenseModel"] = fields.ForeignKeyField(
-        "models.LicenseModel",
+        "core.LicenseModel",
         related_name="clinics",
         on_delete=fields.NO_ACTION,
     )
@@ -133,7 +133,7 @@ class TokenModel(BaseModel):
 
     token = fields.CharField(max_length=500)
     user = fields.ForeignKeyField(
-        "models.UserModel", related_name="tokens", on_delete=fields.CASCADE
+        "core.UserModel", related_name="tokens", on_delete=fields.CASCADE
     )
     refresh_token = fields.CharField(max_length=500)
     expires_at = fields.DatetimeField()
@@ -164,12 +164,12 @@ class LicenseUserModel(BaseModel):
     """Model to represent the relationship between a license and a user."""
 
     user = fields.ForeignKeyField(
-        "models.UserModel",
+        "core.UserModel",
         related_name="licenses",
         on_delete=fields.NO_ACTION,
     )
     license = fields.ForeignKeyField(
-        "models.LicenseModel",
+        "core.LicenseModel",
         related_name="users",
         on_delete=fields.NO_ACTION,
     )
@@ -190,7 +190,7 @@ class PaymentModel(BaseModel):
     """Model to represent a payment."""
 
     license = fields.ForeignKeyField(
-        "models.LicenseUserModel",
+        "core.LicenseUserModel",
         related_name="payments",
         on_delete=fields.NO_ACTION,
     )
@@ -246,7 +246,7 @@ class DocumentModel(BaseModel):
     """Model to represent a document."""
 
     patient = fields.ForeignKeyField(
-        "models.PatientModel",
+        "core.PatientModel",
         related_name="documents",
         on_delete=fields.NO_ACTION,
     )
@@ -282,12 +282,12 @@ class TreatmentPatientModel(BaseModel):
     """Model to represent the relationship between a treatment and a patient."""
 
     patient = fields.ForeignKeyField(
-        "models.PatientModel",
+        "core.PatientModel",
         related_name="treatments",
         on_delete=fields.NO_ACTION,
     )
     treatment = fields.ForeignKeyField(
-        "models.TreatmentModel",
+        "core.TreatmentModel",
         related_name="patients",
         on_delete=fields.NO_ACTION,
     )
@@ -336,7 +336,7 @@ class QuestionModel(BaseModel):
     """Model to represent a question."""
 
     anamnesis = fields.ForeignKeyField(
-        "models.AnamnesisModel",
+        "core.AnamnesisModel",
         related_name="questions",
         on_delete=fields.NO_ACTION,
     )
@@ -354,12 +354,12 @@ class AnswerModel(BaseModel):
     """Model to represent an answer."""
 
     question = fields.ForeignKeyField(
-        "models.QuestionModel",
+        "core.QuestionModel",
         related_name="answers",
         on_delete=fields.NO_ACTION,
     )
     patient = fields.ForeignKeyField(
-        "models.PatientModel",
+        "core.PatientModel",
         related_name="answers",
         on_delete=fields.NO_ACTION,
     )
@@ -378,7 +378,7 @@ class PlanModel(BaseModel):
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     observation = fields.TextField(null=True)
-    specialities = fields.ManyToManyField("models.SpecialtyModel", related_name="plans")
+    specialities = fields.ManyToManyField("core.SpecialtyModel", related_name="plans")
 
     def __str__(self):
         return self.name
@@ -404,12 +404,12 @@ class PlanTreatmentModel(BaseModel):
     """Model to represent the relationship between a plan and a treatment."""
 
     plan = fields.ForeignKeyField(
-        "models.PlanModel",
+        "core.PlanModel",
         related_name="treatments",
         on_delete=fields.NO_ACTION,
     )
     treatment = fields.ForeignKeyField(
-        "models.TreatmentModel",
+        "core.TreatmentModel",
         related_name="plans",
         on_delete=fields.NO_ACTION,
     )
@@ -426,7 +426,7 @@ class LogModel(BaseModel):
     """Log model"""
 
     user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(
-        "models.UserModel", related_name="logs", on_delete=fields.SET_NULL, null=True
+        "core.UserModel", related_name="logs", on_delete=fields.SET_NULL, null=True
     )
 
     module = fields.CharField(max_length=100)

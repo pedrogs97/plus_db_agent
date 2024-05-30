@@ -32,10 +32,10 @@ def get_database_url(test=False, sqlite=False):
 DATABASE_CONFIG = {
     "connections": {"default": get_database_url(sqlite=os.getenv("ENABLE_SQLITE"))},
     "apps": {
-        "models": {
+        "core": {
             "models": [
+                "models",
                 "aerich.models",
-                "database_agent.models",
             ],
             "default_connection": "default",
         },

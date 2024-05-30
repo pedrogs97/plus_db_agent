@@ -4,8 +4,8 @@ from typing import Union
 
 from tortoise.exceptions import IntegrityError
 
-from database_agent.models import LogModel, T, UserModel
-from database_agent.repository import GenericRepository
+from models import LogModel, T, UserModel
+from repository import GenericRepository
 
 logger = logging.getLogger(__name__)
 

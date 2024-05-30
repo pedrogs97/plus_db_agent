@@ -5,8 +5,8 @@ from typing import Union
 from fastapi import status
 from fastapi.exceptions import HTTPException
 
-from database_agent.controller import GenericController
-from database_agent.models import T, UserModel
+from controller import GenericController
+from models import T, UserModel
 
 
 class GenericService:
