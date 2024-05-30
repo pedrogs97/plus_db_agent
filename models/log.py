@@ -1,8 +1,8 @@
 """Log models"""
 from tortoise import fields
 
-from src.config import DEFAULT_DATE_TIME_FORMAT
-from src.models import BaseModel, UserModel
+from config import DEFAULT_DATE_TIME_FORMAT
+from models import BaseModel, UserModel
 
 
 class LogModel(BaseModel):

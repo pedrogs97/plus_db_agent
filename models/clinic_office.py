@@ -4,8 +4,8 @@ import datetime
 
 from tortoise import fields
 
-from src.enums import GenderEnum
-from src.models import BaseModel
+from enums import GenderEnum
+from models import BaseModel
 
 
 class PatientModel(BaseModel):

@@ -2,7 +2,7 @@
 
 from tortoise import fields
 
-from src.models import BaseModel
+from models import BaseModel
 
 
 class LicenseModel(BaseModel):

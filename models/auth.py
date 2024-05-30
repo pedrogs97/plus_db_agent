@@ -2,8 +2,8 @@
 
 from tortoise import fields
 
-from src.enums import ActionEnum, ThemeEnum
-from src.models import BaseModel
+from enums import ActionEnum, ThemeEnum
+from models import BaseModel
 
 
 class UserModel(BaseModel):
