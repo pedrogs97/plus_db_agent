@@ -1,7 +1,7 @@
 """Base service class that will be inherited by all other services"""
 
 import logging
-from typing import List, Type, Union, get_type_hints
+from typing import List, Type, get_type_hints
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
@@ -61,7 +61,7 @@ class GenericService:
                 detail={"field": "id", "message": "Não encontrado"},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        return await self.serializer_obj(obj)
+        return await self.serializer_obj(obj, self.serializer)
 
     async def list(self, **filters) -> list[T]:
         """List objects"""
@@ -71,7 +71,7 @@ class GenericService:
     async def add(self, record: dict, authenticated_user: UserModel) -> T:
         """Add an object"""
         obj_created: T = await self.controller.add(record, authenticated_user)
-        return self.serializer_obj(obj_created)
+        return self.serializer_obj(obj_created, self.serializer)
 
     async def update(self, record: dict, pk: int, authenticated_user: UserModel) -> T:
         """Update an object"""
@@ -81,7 +81,7 @@ class GenericService:
                 detail={"field": "id", "message": "Não encontrado"},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        return self.serializer_obj(obj_updated)
+        return self.serializer_obj(obj_updated, self.serializer)
 
     async def delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Delete an object"""
@@ -97,6 +97,12 @@ class GenericService:
         """Soft delete an object"""
         await self.update({"deleted": True}, pk, authenticated_user)
 
-    async def get_by_field(self, field: str, value: str) -> Union[T, None]:
+    async def get_by_field(self, field: str, value: str) -> T:
         """Get an object by a field"""
-        return await self.controller.get_by_field(field, value)
+        obj = await self.controller.get_by_field(field, value)
+        if not obj:
+            raise HTTPException(
+                detail={"field": field, "message": "Não encontrado"},
+                status_code=status.HTTP_404_NOT_FOUND,
+            )
+        return await self.serializer_obj(obj, self.serializer)
