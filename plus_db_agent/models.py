@@ -1,11 +1,13 @@
+"""Models for the core application."""
+
 from datetime import datetime
 from typing import TypeVar
 
 from tortoise import fields
 from tortoise.models import Model
 
-from .config import DEFAULT_DATE_TIME_FORMAT
-from .enums import ActionEnum, GenderEnum, ThemeEnum
+from plus_db_agent.config import DEFAULT_DATE_TIME_FORMAT
+from plus_db_agent.enums import ActionEnum, GenderEnum, ThemeEnum
 
 
 class BaseModel(Model):

@@ -1,10 +1,11 @@
 """Manager for the database"""
+
 import os
 
 from tortoise import Tortoise, connections
 
-from .config import DATABASE_CONFIG, bcrypt_context
-from .models import ProfileModel, UserModel
+from plus_db_agent.config import DATABASE_CONFIG, bcrypt_context
+from plus_db_agent.models import ProfileModel, UserModel
 
 
 def hash_password(password: str) -> str:

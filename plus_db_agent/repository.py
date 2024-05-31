@@ -1,7 +1,8 @@
 """This module contains the generic repository class"""
+
 from typing import List, Optional, Type
 
-from .models import T
+from plus_db_agent.models import T
 
 
 class GenericRepository:

@@ -1,3 +1,5 @@
+""" Configuration file for the application """
+
 import os
 
 from dotenv import load_dotenv
@@ -7,6 +9,7 @@ load_dotenv()
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DB_HOST = os.getenv("POSTGRESQL_HOST", "localhost")
+MODELS_MODULE = os.getenv("MODELS_MODULE", "models")
 
 
 def get_database_url(test=False, sqlite=False):

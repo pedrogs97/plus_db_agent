@@ -1,4 +1,5 @@
 """Base filter for Tortoise orm related filters."""
+
 from collections import defaultdict
 from typing import Annotated, Optional, Union, get_type_hints
 
@@ -8,7 +9,7 @@ from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
-from .models import BaseModel, T
+from plus_db_agent.models import BaseModel, T
 
 
 class BaseFilter(PydanticBaseModel):
