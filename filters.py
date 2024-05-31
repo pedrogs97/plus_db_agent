@@ -1,6 +1,7 @@
 """Base filter for Tortoise orm related filters."""
-from typing import Union
+from typing import Annotated, Union
 
+from fastapi import Query
 from fastapi_filter.base.filter import BaseFilterModel
 from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
@@ -52,3 +53,15 @@ class Filter(BaseFilterModel):
         query = query.order_by(*self.ordering_values)
 
         return query
+
+
+class PaginationFilter:
+    """Filter for pagination."""
+
+    def __init__(
+        self,
+        page: Annotated[int, Query(title="Page number")],
+        size: Annotated[int, Query(title="Page size")],
+    ):
+        self.page = page
+        self.size = size

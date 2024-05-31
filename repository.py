@@ -15,7 +15,10 @@ class GenericRepository:
 
     async def list(self, **filters) -> List[T]:
         """List records"""
-        return await self.model.filter(**filters)
+        if "ordering" in filters:
+            ordering = filters.pop("ordering")
+            return await self.model.filter(**filters).order_by(*ordering)
+        return await self.model.filter(**filters).order_by("-created_at")
 
     async def add(self, record: dict) -> T:
         """Add a record"""

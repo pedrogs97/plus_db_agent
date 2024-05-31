@@ -5,9 +5,11 @@ from typing import List, Type, get_type_hints
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
+from fastapi_pagination import Page, Params, paginate
 from pydantic import ValidationError
 
 from controller import GenericController
+from filters import Filter, PaginationFilter
 from models import BaseModel, T, UserModel
 from schemas import BaseSchema
 
@@ -63,7 +65,19 @@ class GenericService:
             )
         return await self.serializer_obj(obj, self.serializer)
 
-    async def list(self, **filters) -> list[T]:
+    async def paginated_list(
+        self, list_filters: Filter, page_filter: PaginationFilter
+    ) -> Page[T]:
+        """List paginated objects"""
+        user_list = list_filters.filter(self.model.filter(deleted=False))
+        user_list = await self.serializer_list(user_list.all())
+        paginated = paginate(
+            user_list,
+            params=Params(page=page_filter.page, size=page_filter.size),
+        )
+        return paginated
+
+    async def list(self, **filters) -> List[BaseSchema]:
         """List objects"""
         list_objs = await self.controller.list(**filters)
         return await self.serializer_list(list_objs)
