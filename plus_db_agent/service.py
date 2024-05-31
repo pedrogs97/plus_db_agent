@@ -37,12 +37,8 @@ class GenericService:
                 if field_name in data and issubclass(related_obj, BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
-                        data.update(
-                            {
-                                field_name: await self.serializer_obj(
-                                    obj=related_obj, serializer=field_type
-                                )
-                            }
+                        data[field_name] = await self.serializer_obj(
+                            obj=related_obj, serializer=field_type
                         )
                     except ValidationError as e:
                         logger.warning("Erro de validação no campo %s", field_name)
