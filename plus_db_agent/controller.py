@@ -1,18 +1,18 @@
 """Base service class that will be inherited by all other services"""
 
-from typing import Union
+from typing import Type, Union
 
 from tortoise.exceptions import IntegrityError
 
 from plus_db_agent.logger import logger
-from plus_db_agent.models import LogModel, T, UserModel
+from plus_db_agent.models import BaseModel, LogModel, UserModel
 from plus_db_agent.repository import GenericRepository
 
 
 class GenericController:
     """Base service class that will be inherited by all other services"""
 
-    model: T
+    model: Type[BaseModel]
     repository = GenericRepository()
     module_name = "base"
 
@@ -39,17 +39,17 @@ class GenericController:
             logger.error("Error setting log: %s", error)
             return False
 
-    async def get_obj_or_none(self, pk: int) -> Union[T, None]:
+    async def get_obj_or_none(self, pk: int) -> Union[BaseModel, None]:
         """Get an object by its id or raise a none error"""
         return await self.repository.get_by_id(pk)
 
-    async def list(self, **filters) -> list[T]:
+    async def list(self, **filters) -> list[BaseModel]:
         """List objects"""
         return await self.repository.list(**filters)
 
-    async def add(self, record: dict, authenticated_user: UserModel) -> T:
+    async def add(self, record: dict, authenticated_user: UserModel) -> BaseModel:
         """Add an object"""
-        obj_created: T = await self.repository.add(record)
+        obj_created: BaseModel = await self.repository.add(record)
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -61,12 +61,12 @@ class GenericController:
 
     async def update(
         self, record: dict, pk: int, authenticated_user: UserModel
-    ) -> Union[T, None]:
+    ) -> Union[BaseModel, None]:
         """Update an object"""
         obj = await self.get_obj_or_none(pk)
         if not obj:
             return None
-        obj_updated: T = await self.repository.update(obj, record)
+        obj_updated: BaseModel = await self.repository.update(obj, record)
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -78,7 +78,7 @@ class GenericController:
 
     async def delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Delete an object"""
-        obj: T = await self.get_obj_or_none(pk)
+        obj: BaseModel = await self.get_obj_or_none(pk)
         await self.repository.delete(obj.id)
         self.__set_log(
             module=self.module_name,
@@ -90,7 +90,7 @@ class GenericController:
 
     async def soft_delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Soft delete an object"""
-        obj_updated: T = self.update({"deleted": True}, pk, authenticated_user)
+        obj_updated: BaseModel = self.update({"deleted": True}, pk, authenticated_user)
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -99,6 +99,6 @@ class GenericController:
             user=authenticated_user,
         )
 
-    async def get_by_field(self, field: str, value: str) -> Union[T, None]:
+    async def get_by_field(self, field: str, value: str) -> Union[BaseModel, None]:
         """Get an object by a field"""
         return await self.repository.get_by_field(field, value)

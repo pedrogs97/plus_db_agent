@@ -1,7 +1,6 @@
 """Models for the core application."""
 
 from datetime import datetime
-from typing import TypeVar
 
 from tortoise import fields
 from tortoise.models import Model
@@ -20,9 +19,6 @@ class BaseModel(Model):
 
     class Meta:
         abstract = True
-
-
-T = TypeVar("T", bound=BaseModel)
 
 
 class UserModel(BaseModel):

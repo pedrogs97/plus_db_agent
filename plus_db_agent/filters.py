@@ -9,7 +9,7 @@ from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
-from plus_db_agent.models import BaseModel, T
+from plus_db_agent.models import BaseModel
 
 
 class BaseFilter(PydanticBaseModel):
@@ -18,7 +18,7 @@ class BaseFilter(PydanticBaseModel):
     class Constants:
         """Constants for the base filter."""
 
-        model: T
+        model: BaseModel
         ordering_field_name: str = "order_by"
         search_model_fields: list[str]
         search_field_name: str = "search"

@@ -10,19 +10,22 @@ from pydantic import ValidationError
 from plus_db_agent.controller import GenericController
 from plus_db_agent.filters import BaseFilter, PaginationFilter
 from plus_db_agent.logger import logger
-from plus_db_agent.models import BaseModel, T, UserModel
+from plus_db_agent.models import BaseModel, UserModel
 from plus_db_agent.schemas import BaseSchema
 
 
 class GenericService:
     """Base service class that will be inherited by all other services"""
 
-    model: Type[T]
+    model: Type[BaseModel]
     controller = GenericController()
     module_name = "base"
     serializer = Type[BaseSchema]
 
-    async def serializer_obj(self, obj: T, serializer: BaseSchema) -> BaseSchema:
+    async def serializer_obj(
+        self, obj: BaseModel, serializer: BaseSchema
+    ) -> BaseSchema:
+        """Create a serializer object from a model object"""
         data = obj.__dict__
         hints = get_type_hints(serializer)
 
@@ -50,10 +53,11 @@ class GenericService:
 
         return instance
 
-    async def serializer_list(self, objs: List[T]) -> List[BaseSchema]:
+    async def serializer_list(self, objs: List[BaseModel]) -> List[BaseSchema]:
+        """Create a list of serializer objects from a list of model objects"""
         return [await self.serializer_obj(obj, self.serializer) for obj in objs]
 
-    async def get_obj_or_404(self, pk: int) -> T:
+    async def get_obj_or_404(self, pk: int) -> BaseModel:
         """Get an object by its id or raise a 404 error"""
         obj = await self.controller.get_obj_or_none(pk)
         if not obj:
@@ -65,7 +69,7 @@ class GenericService:
 
     async def paginated_list(
         self, list_filters: BaseFilter, page_filter: PaginationFilter
-    ) -> Page[T]:
+    ) -> Page[BaseModel]:
         """List paginated objects"""
         user_list = await list_filters.filter(self.model.filter(deleted=False))
         user_list = await self.serializer_list(user_list.all())
@@ -80,12 +84,14 @@ class GenericService:
         list_objs = await self.controller.list(**filters)
         return await self.serializer_list(list_objs)
 
-    async def add(self, record: dict, authenticated_user: UserModel) -> T:
+    async def add(self, record: dict, authenticated_user: UserModel) -> BaseModel:
         """Add an object"""
-        obj_created: T = await self.controller.add(record, authenticated_user)
+        obj_created: BaseModel = await self.controller.add(record, authenticated_user)
         return self.serializer_obj(obj_created, self.serializer)
 
-    async def update(self, record: dict, pk: int, authenticated_user: UserModel) -> T:
+    async def update(
+        self, record: dict, pk: int, authenticated_user: UserModel
+    ) -> BaseModel:
         """Update an object"""
         obj_updated = await self.controller.update(record, pk, authenticated_user)
         if not obj_updated:
@@ -97,7 +103,7 @@ class GenericService:
 
     async def delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Delete an object"""
-        obj: T = await self.controller.get_obj_or_none(pk)
+        obj: BaseModel = await self.controller.get_obj_or_none(pk)
         if not obj:
             raise HTTPException(
                 detail={"field": "id", "message": "Não encontrado"},
@@ -109,7 +115,7 @@ class GenericService:
         """Soft delete an object"""
         await self.update({"deleted": True}, pk, authenticated_user)
 
-    async def get_by_field(self, field: str, value: str) -> T:
+    async def get_by_field(self, field: str, value: str) -> BaseModel:
         """Get an object by a field"""
         obj = await self.controller.get_by_field(field, value)
         if not obj:
