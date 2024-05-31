@@ -41,7 +41,7 @@ class GenericController:
 
     async def get_obj_or_none(self, pk: int) -> Union[BaseModel, None]:
         """Get an object by its id or raise a none error"""
-        return await self.repository.get_by_id(pk)
+        return await self.repository.get_by_id(pk=pk)
 
     async def list(self, **filters) -> list[BaseModel]:
         """List objects"""
@@ -49,7 +49,7 @@ class GenericController:
 
     async def add(self, record: dict, authenticated_user: UserModel) -> BaseModel:
         """Add an object"""
-        obj_created: BaseModel = await self.repository.add(record)
+        obj_created: BaseModel = await self.repository.add(record=record)
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -63,10 +63,12 @@ class GenericController:
         self, record: dict, pk: int, authenticated_user: UserModel
     ) -> Union[BaseModel, None]:
         """Update an object"""
-        obj = await self.get_obj_or_none(pk)
+        obj = await self.get_obj_or_none(pk=pk)
         if not obj:
             return None
-        obj_updated: BaseModel = await self.repository.update(obj, record)
+        obj_updated: BaseModel = await self.repository.update(
+            record=record, instance=obj
+        )
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -78,8 +80,8 @@ class GenericController:
 
     async def delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Delete an object"""
-        obj: BaseModel = await self.get_obj_or_none(pk)
-        await self.repository.delete(obj.id)
+        obj: BaseModel = await self.get_obj_or_none(pk=pk)
+        await self.repository.delete(pk=obj.id)
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -90,7 +92,9 @@ class GenericController:
 
     async def soft_delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Soft delete an object"""
-        obj_updated: BaseModel = self.update({"deleted": True}, pk, authenticated_user)
+        obj_updated: BaseModel = self.update(
+            record={"deleted": True}, pk=pk, authenticated_user=authenticated_user
+        )
         self.__set_log(
             module=self.module_name,
             model=self.model.__name__,
@@ -101,4 +105,4 @@ class GenericController:
 
     async def get_by_field(self, field: str, value: str) -> Union[BaseModel, None]:
         """Get an object by a field"""
-        return await self.repository.get_by_field(field, value)
+        return await self.repository.get_by_field(field=field, value=value)

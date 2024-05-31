@@ -36,7 +36,7 @@ class GenericService:
                     try:
                         # Recursivamente cria uma serailzier da submodel
                         data[field_name] = await self.serializer_obj(
-                            data[field_name], field_type
+                            obj=data[field_name], serializer=field_type
                         )
                     except ValidationError as e:
                         logger.warning(
@@ -55,17 +55,20 @@ class GenericService:
 
     async def serializer_list(self, objs: List[BaseModel]) -> List[BaseSchema]:
         """Create a list of serializer objects from a list of model objects"""
-        return [await self.serializer_obj(obj, self.serializer) for obj in objs]
+        return [
+            await self.serializer_obj(obj=obj, serializer=self.serializer)
+            for obj in objs
+        ]
 
     async def get_obj_or_404(self, pk: int) -> BaseModel:
         """Get an object by its id or raise a 404 error"""
-        obj = await self.controller.get_obj_or_none(pk)
+        obj = await self.controller.get_obj_or_none(pk=pk)
         if not obj:
             raise HTTPException(
                 detail={"field": "id", "message": "Não encontrado"},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        return await self.serializer_obj(obj, self.serializer)
+        return await self.serializer_obj(obj=obj, serializer=self.serializer)
 
     async def paginated_list(
         self, list_filters: BaseFilter, page_filter: PaginationFilter
@@ -82,18 +85,22 @@ class GenericService:
     async def list(self, **filters) -> List[BaseSchema]:
         """List objects"""
         list_objs = await self.controller.list(**filters)
-        return await self.serializer_list(list_objs)
+        return await self.serializer_list(objs=list_objs)
 
     async def add(self, record: dict, authenticated_user: UserModel) -> BaseModel:
         """Add an object"""
-        obj_created: BaseModel = await self.controller.add(record, authenticated_user)
-        return self.serializer_obj(obj_created, self.serializer)
+        obj_created: BaseModel = await self.controller.add(
+            record=record, authenticated_user=authenticated_user
+        )
+        return self.serializer_obj(obj=obj_created, serializer=self.serializer)
 
     async def update(
         self, record: dict, pk: int, authenticated_user: UserModel
     ) -> BaseModel:
         """Update an object"""
-        obj_updated = await self.controller.update(record, pk, authenticated_user)
+        obj_updated = await self.controller.update(
+            record=record, pk=pk, authenticated_user=authenticated_user
+        )
         if not obj_updated:
             raise HTTPException(
                 detail={"field": "id", "message": "Não encontrado"},
@@ -103,24 +110,26 @@ class GenericService:
 
     async def delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Delete an object"""
-        obj: BaseModel = await self.controller.get_obj_or_none(pk)
+        obj: BaseModel = await self.controller.get_obj_or_none(pk=pk)
         if not obj:
             raise HTTPException(
                 detail={"field": "id", "message": "Não encontrado"},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        await self.controller.delete(obj.id, authenticated_user)
+        await self.controller.delete(pk=obj.id, authenticated_user=authenticated_user)
 
     async def soft_delete(self, pk: int, authenticated_user: UserModel) -> None:
         """Soft delete an object"""
-        await self.update({"deleted": True}, pk, authenticated_user)
+        await self.update(
+            record={"deleted": True}, pk=pk, authenticated_user=authenticated_user
+        )
 
     async def get_by_field(self, field: str, value: str) -> BaseModel:
         """Get an object by a field"""
-        obj = await self.controller.get_by_field(field, value)
+        obj = await self.controller.get_by_field(field=field, value=value)
         if not obj:
             raise HTTPException(
                 detail={"field": field, "message": "Não encontrado"},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
-        return await self.serializer_obj(obj, self.serializer)
+        return await self.serializer_obj(obj=obj, serializer=self.serializer)
