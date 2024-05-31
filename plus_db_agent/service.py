@@ -7,11 +7,11 @@ from fastapi.exceptions import HTTPException
 from fastapi_pagination import Page, Params, paginate
 from pydantic import ValidationError
 
-from src.controller import GenericController
-from src.filters import BaseFilter, PaginationFilter
-from src.logger import logger
-from src.models import BaseModel, T, UserModel
-from src.schemas import BaseSchema
+from plus_db_agent.controller import GenericController
+from plus_db_agent.filters import BaseFilter, PaginationFilter
+from plus_db_agent.logger import logger
+from plus_db_agent.models import BaseModel, T, UserModel
+from plus_db_agent.schemas import BaseSchema
 
 
 class GenericService:

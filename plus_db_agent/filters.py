@@ -9,7 +9,7 @@ from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
-from src.models import BaseModel, T
+from plus_db_agent.models import BaseModel, T
 
 
 class BaseFilter(PydanticBaseModel):

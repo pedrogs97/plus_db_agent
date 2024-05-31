@@ -2,7 +2,7 @@
 
 from typing import List, Optional, Type
 
-from src.models import T
+from plus_db_agent.models import T
 
 
 class GenericRepository:
