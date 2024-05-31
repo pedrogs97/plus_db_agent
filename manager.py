@@ -43,5 +43,3 @@ async def init():
         await __create_superuser()
     finally:
         ...
-    yield
-    await close()

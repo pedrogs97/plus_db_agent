@@ -34,8 +34,8 @@ DATABASE_CONFIG = {
     "apps": {
         "core": {
             "models": [
-                "models",
                 "aerich.models",
+                "plus_db_agent.models",
             ],
             "default_connection": "default",
         },
