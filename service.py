@@ -9,7 +9,7 @@ from fastapi_pagination import Page, Params, paginate
 from pydantic import ValidationError
 
 from controller import GenericController
-from filters import Filter, PaginationFilter
+from filters import BaseFilter, PaginationFilter
 from models import BaseModel, T, UserModel
 from schemas import BaseSchema
 
@@ -66,10 +66,10 @@ class GenericService:
         return await self.serializer_obj(obj, self.serializer)
 
     async def paginated_list(
-        self, list_filters: Filter, page_filter: PaginationFilter
+        self, list_filters: BaseFilter, page_filter: PaginationFilter
     ) -> Page[T]:
         """List paginated objects"""
-        user_list = list_filters.filter(self.model.filter(deleted=False))
+        user_list = await list_filters.filter(self.model.filter(deleted=False))
         user_list = await self.serializer_list(user_list.all())
         paginated = paginate(
             user_list,

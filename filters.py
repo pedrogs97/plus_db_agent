@@ -1,15 +1,95 @@
 """Base filter for Tortoise orm related filters."""
-from typing import Annotated, Union
+from collections import defaultdict
+from typing import Annotated, Optional, Union, get_type_hints
 
 from fastapi import Query
-from fastapi_filter.base.filter import BaseFilterModel
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
+from models import BaseModel, T
 
-class Filter(BaseFilterModel):
+
+class BaseFilter(PydanticBaseModel):
     """Base filter for Tortoise orm related filters."""
+
+    class Constants:
+        model: T
+        ordering_field_name: str = "order_by"
+        search_model_fields: list[str]
+        search_field_name: str = "search"
+        prefix: str
+        original_filter: type["BaseFilter"]
+
+    @property
+    def filtering_fields(self):
+        fields = self.model_dump(exclude_none=True, exclude_unset=True)
+        fields.pop(self.Constants.ordering_field_name, None)
+        return fields.items()
+
+    @property
+    def ordering_values(self):
+        """Check that the ordering field is present on the class definition."""
+        try:
+            return getattr(self, self.Constants.ordering_field_name)
+        except AttributeError as e:
+            raise AttributeError(
+                f"Ordering field {self.Constants.ordering_field_name} is not defined. "
+                "Make sure to add it to your filter class."
+            ) from e
+
+    @field_validator("*", mode="before", check_fields=False)
+    def strip_order_by_values(cls, value: Optional[str], field: ValidationInfo):
+        if field.field_name != cls.Constants.ordering_field_name:
+            return value
+
+        if not value:
+            return None
+
+        stripped_values = []
+        for field_name in value:
+            stripped_value = field_name.strip()
+            if stripped_value:
+                stripped_values.append(stripped_value)
+
+        return stripped_values
+
+    @field_validator("*", mode="before", check_fields=False)
+    def validate_order_by(cls, value: Optional[str], field: ValidationInfo):
+        if field.field_name != cls.Constants.ordering_field_name:
+            return value
+
+        if not value:
+            return None
+
+        field_name_usages = defaultdict(list)
+        duplicated_field_names = set()
+
+        for field_name_with_direction in value:
+            field_name = field_name_with_direction.replace("-", "").replace("+", "")
+
+            if not hasattr(cls.Constants.model, field_name):
+                raise ValueError(f"{field_name} is not a valid ordering field.")
+
+            field_name_usages[field_name].append(field_name_with_direction)
+            if len(field_name_usages[field_name]) > 1:
+                duplicated_field_names.add(field_name)
+
+        if duplicated_field_names:
+            ambiguous_field_names = ", ".join(
+                [
+                    field_name_with_direction
+                    for field_name in sorted(duplicated_field_names)
+                    for field_name_with_direction in field_name_usages[field_name]
+                ]
+            )
+            raise ValueError(
+                f"Field names can appear at most once for {cls.Constants.ordering_field_name}. "
+                f"The following was ambiguous: {ambiguous_field_names}."
+            )
+
+        return value
 
     @field_validator("*", mode="before")
     def split_str(
@@ -31,8 +111,17 @@ class Filter(BaseFilterModel):
             return list(value.split(","))
         return value
 
-    def filter(self, query: Union[QuerySet, QuerySetSingle]):
+    async def filter(self, query: Union[QuerySet, QuerySetSingle]):
+        hints = get_type_hints(self.Constants.model)
+        hints_dict = {field: field_type for field, field_type in hints.items()}
         for field_name, value in self.filtering_fields:
+            if (
+                "__" in field_name
+                and field_name in hints_dict
+                and issubclass(hints_dict[field_name], BaseModel)
+            ):
+                related_field_name = field_name.split("__")[0]
+                await query.prefetch_related(related_field_name)
             if field_name == self.Constants.search_field_name and hasattr(
                 self.Constants, "search_model_fields"
             ):
