@@ -30,14 +30,10 @@ class GenericService:
         hints = get_type_hints(serializer)
 
         for field_name, field_type in hints.items():
-            logger.debug("field_type: %s", field_type)
-            logger.debug("field_name: %s", field_name)
             if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
                 # Se o campo é uma submodel está presente nos dados
-                logger.debug("obj: %s", data)
                 await obj.fetch_related(field_name)
                 related_obj = getattr(obj, field_name)
-                logger.debug("related_obj: %s", related_obj)
                 if field_name in data and issubclass(related_obj, BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
@@ -55,6 +51,7 @@ class GenericService:
 
         try:
             # Cria um serializer da model principal a partir do dicionário
+            logger.debug("Data: %s", data)
             instance = serializer(**data)
         except ValidationError as e:
             logger.warning("Erro de validação no modelo: %s", e)
