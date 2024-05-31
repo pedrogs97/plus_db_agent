@@ -32,14 +32,17 @@ class GenericService:
         for field_name, field_type in hints.items():
             if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
                 # Se o campo é uma submodel está presente nos dados
-                if field_name in data and isinstance(data[field_name], BaseModel):
+                if field_name in data and issubclass(data[field_name], BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
-                        data[field_name] = await self.serializer_obj(
-                            obj=data[field_name], serializer=field_type
+                        data.update(
+                            {
+                                field_name: await self.serializer_obj(
+                                    obj=data[field_name], serializer=field_type
+                                )
+                            }
                         )
                     except ValidationError as e:
-                        logger.debug("Data: %s", data)
                         logger.warning("Erro de validação no campo %s", field_name)
                         logger.warning("Erro:", e)
                         raise
@@ -48,7 +51,6 @@ class GenericService:
             # Cria um serializer da model principal a partir do dicionário
             instance = serializer(**data)
         except ValidationError as e:
-            logger.debug("Data: %s", data)
             logger.warning("Erro de validação no modelo: %s", e)
             raise
 
