@@ -1,6 +1,6 @@
 """This module contains the generic repository class"""
 
-from typing import List, Optional, Type
+from typing import List, Optional
 
 from plus_db_agent.models import BaseModel
 
@@ -8,7 +8,7 @@ from plus_db_agent.models import BaseModel
 class GenericRepository:
     """Generic repository class that will be inherited by all other repositories"""
 
-    model = Type[BaseModel]
+    model = BaseModel
 
     async def get_by_id(self, pk: int) -> Optional[BaseModel]:
         """Get a record by its pk"""

@@ -1,6 +1,6 @@
 """Base service class that will be inherited by all other services"""
 
-from typing import Type, Union
+from typing import Union
 
 from tortoise.exceptions import IntegrityError
 
@@ -12,7 +12,7 @@ from plus_db_agent.repository import GenericRepository
 class GenericController:
     """Base service class that will be inherited by all other services"""
 
-    model = Type[BaseModel]
+    model = BaseModel
     repository = GenericRepository()
     module_name = "base"
 
