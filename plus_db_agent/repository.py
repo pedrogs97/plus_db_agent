@@ -8,7 +8,7 @@ from plus_db_agent.models import BaseModel
 class GenericRepository:
     """Generic repository class that will be inherited by all other repositories"""
 
-    model: Type[BaseModel]
+    model = Type[BaseModel]
 
     async def get_by_id(self, pk: int) -> Optional[BaseModel]:
         """Get a record by its pk"""

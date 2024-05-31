@@ -17,7 +17,7 @@ from plus_db_agent.schemas import BaseSchema
 class GenericService:
     """Base service class that will be inherited by all other services"""
 
-    model: Type[BaseModel]
+    model = Type[BaseModel]
     controller = GenericController()
     module_name = "base"
     serializer = Type[BaseSchema]

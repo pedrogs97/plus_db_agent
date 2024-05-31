@@ -12,7 +12,7 @@ from plus_db_agent.repository import GenericRepository
 class GenericController:
     """Base service class that will be inherited by all other services"""
 
-    model: Type[BaseModel]
+    model = Type[BaseModel]
     repository = GenericRepository()
     module_name = "base"
 
