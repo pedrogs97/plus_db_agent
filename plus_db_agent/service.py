@@ -34,8 +34,8 @@ class GenericService:
             logger.debug("field_name: %s", field_name)
             if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
                 # Se o campo é uma submodel está presente nos dados
-                logger.debug("obj: %s", obj)
-                await self.model.fetch_related(field_name)
+                logger.debug("obj: %s", data)
+                await obj.fetch_related(field_name)
                 related_obj = getattr(obj, field_name)
                 logger.debug("related_obj: %s", related_obj)
                 if field_name in data and issubclass(related_obj, BaseModel):
