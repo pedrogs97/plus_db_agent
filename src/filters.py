@@ -9,13 +9,15 @@ from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
-from plus_db_agent.models import BaseModel, T
+from src.models import BaseModel, T
 
 
 class BaseFilter(PydanticBaseModel):
     """Base filter for Tortoise orm related filters."""
 
     class Constants:
+        """Constants for the base filter."""
+
         model: T
         ordering_field_name: str = "order_by"
         search_model_fields: list[str]
@@ -25,6 +27,7 @@ class BaseFilter(PydanticBaseModel):
 
     @property
     def filtering_fields(self):
+        """Get filtering fields."""
         fields = self.model_dump(exclude_none=True, exclude_unset=True)
         fields.pop(self.Constants.ordering_field_name, None)
         return fields.items()
@@ -41,7 +44,10 @@ class BaseFilter(PydanticBaseModel):
             ) from e
 
     @field_validator("*", mode="before", check_fields=False)
-    def strip_order_by_values(cls, value: Optional[str], field: ValidationInfo):
+    def strip_order_by_values(
+        cls, value: Optional[str], field: ValidationInfo
+    ):  # pylint: disable=no-self-argument
+        """Strip ordering values."""
         if field.field_name != cls.Constants.ordering_field_name:
             return value
 
@@ -57,7 +63,10 @@ class BaseFilter(PydanticBaseModel):
         return stripped_values
 
     @field_validator("*", mode="before", check_fields=False)
-    def validate_order_by(cls, value: Optional[str], field: ValidationInfo):
+    def validate_order_by(
+        cls, value: Optional[str], field: ValidationInfo
+    ):  # pylint: disable=no-self-argument
+        """Validate ordering values."""
         if field.field_name != cls.Constants.ordering_field_name:
             return value
 
@@ -113,6 +122,7 @@ class BaseFilter(PydanticBaseModel):
         return value
 
     async def filter(self, query: Union[QuerySet, QuerySetSingle]):
+        """Filter the query."""
         hints = get_type_hints(self.Constants.model)
         hints_dict = {field: field_type for field, field_type in hints.items()}
         for field_name, value in self.filtering_fields:
@@ -137,6 +147,7 @@ class BaseFilter(PydanticBaseModel):
         return query
 
     def sort(self, query: Union[QuerySet, QuerySetSingle]):
+        """Sort the query."""
         if not self.ordering_values:
             return query
 

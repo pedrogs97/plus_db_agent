@@ -4,9 +4,9 @@ from typing import Union
 
 from tortoise.exceptions import IntegrityError
 
-from plus_db_agent.logger import logger
-from plus_db_agent.models import LogModel, T, UserModel
-from plus_db_agent.repository import GenericRepository
+from src.logger import logger
+from src.models import LogModel, T, UserModel
+from src.repository import GenericRepository
 
 
 class GenericController:

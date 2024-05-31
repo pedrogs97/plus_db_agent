@@ -6,8 +6,8 @@ from typing import TypeVar
 from tortoise import fields
 from tortoise.models import Model
 
-from plus_db_agent.config import DEFAULT_DATE_TIME_FORMAT
-from plus_db_agent.enums import ActionEnum, GenderEnum, ThemeEnum
+from src.config import DEFAULT_DATE_TIME_FORMAT
+from src.enums import ActionEnum, GenderEnum, ThemeEnum
 
 
 class BaseModel(Model):
