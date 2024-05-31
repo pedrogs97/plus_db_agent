@@ -1,13 +1,11 @@
 """Base service class that will be inherited by all other services"""
-import logging
 from typing import Union
 
 from tortoise.exceptions import IntegrityError
 
-from models import LogModel, T, UserModel
-from repository import GenericRepository
-
-logger = logging.getLogger(__name__)
+from .logger import logger
+from .models import LogModel, T, UserModel
+from .repository import GenericRepository
 
 
 class GenericController:

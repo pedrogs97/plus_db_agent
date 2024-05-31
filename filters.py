@@ -8,7 +8,7 @@ from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
 from tortoise.queryset import QuerySet, QuerySetSingle
 
-from models import BaseModel, T
+from .models import BaseModel, T
 
 
 class BaseFilter(PydanticBaseModel):

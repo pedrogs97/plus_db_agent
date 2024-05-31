@@ -3,8 +3,8 @@ import os
 
 from tortoise import Tortoise, connections
 
-from config import DATABASE_CONFIG, bcrypt_context
-from models import ProfileModel, UserModel
+from .config import DATABASE_CONFIG, bcrypt_context
+from .models import ProfileModel, UserModel
 
 
 def hash_password(password: str) -> str:
@@ -12,7 +12,7 @@ def hash_password(password: str) -> str:
     return bcrypt_context.hash(password)
 
 
-async def create_superuser():
+async def __create_superuser():
     """Create a test user"""
     profile_manager, _ = await ProfileModel.get_or_create(defaults={"name": "Manager"})
     await UserModel.get_or_create(
@@ -40,7 +40,7 @@ async def init():
     await Tortoise.init(config=DATABASE_CONFIG)
     await Tortoise.generate_schemas()
     try:
-        await create_superuser()
+        await __create_superuser()
     finally:
         ...
     yield

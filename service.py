@@ -1,6 +1,5 @@
 """Base service class that will be inherited by all other services"""
 
-import logging
 from typing import List, Type, get_type_hints
 
 from fastapi import status
@@ -8,12 +7,11 @@ from fastapi.exceptions import HTTPException
 from fastapi_pagination import Page, Params, paginate
 from pydantic import ValidationError
 
-from controller import GenericController
-from filters import BaseFilter, PaginationFilter
-from models import BaseModel, T, UserModel
-from schemas import BaseSchema
-
-logger = logging.getLogger(__name__)
+from .controller import GenericController
+from .filters import BaseFilter, PaginationFilter
+from .logger import logger
+from .models import BaseModel, T, UserModel
+from .schemas import BaseSchema
 
 
 class GenericService:
