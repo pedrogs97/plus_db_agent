@@ -30,6 +30,9 @@ class GenericService:
         hints = get_type_hints(serializer)
 
         for field_name, field_type in hints.items():
+            logger.debug("field_type: %s", field_type)
+            logger.debug("field_name: %s", field_name)
+            logger.debug("data[field_name]: %s", data[field_name])
             if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
                 # Se o campo é uma submodel está presente nos dados
                 if field_name in data and issubclass(data[field_name], BaseModel):
