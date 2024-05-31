@@ -26,7 +26,7 @@ class GenericService:
         self, obj: BaseModel, serializer: BaseSchema
     ) -> BaseSchema:
         """Create a serializer object from a model object"""
-        data = obj.__dict__
+        data = obj.__dict__.copy()
         hints = get_type_hints(serializer)
 
         for field_name, field_type in hints.items():
@@ -39,9 +39,9 @@ class GenericService:
                             obj=data[field_name], serializer=field_type
                         )
                     except ValidationError as e:
-                        logger.warning(
-                            f"Erro de validação no campo {field_name}: %s", e
-                        )
+                        logger.debug("Data: %s", data)
+                        logger.warning("Erro de validação no campo %s", field_name)
+                        logger.warning("Erro:", e)
                         raise
 
         try:
