@@ -5,6 +5,7 @@ import os
 from tortoise import Tortoise, connections
 
 from plus_db_agent.config import DATABASE_CONFIG, bcrypt_context
+from plus_db_agent.logger import logger
 from plus_db_agent.models import ProfileModel, UserModel
 
 
@@ -32,15 +33,18 @@ async def __create_superuser():
 
 async def close():
     """Close all connections"""
+    logger.info("Closing database connections")
     await connections.close_all()
     await Tortoise.close_connections()
 
 
 async def init():
     """Init the database"""
+    logger.info("Initializing database")
     await Tortoise.init(config=DATABASE_CONFIG)
-    await Tortoise.generate_schemas()
+    # await Tortoise.generate_schemas()
     try:
+        logger.info("Trying create superuser")
         await __create_superuser()
     finally:
         ...
