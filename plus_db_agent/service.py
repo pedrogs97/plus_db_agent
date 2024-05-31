@@ -48,6 +48,7 @@ class GenericService:
             # Cria um serializer da model principal a partir do dicionário
             instance = serializer(**data)
         except ValidationError as e:
+            logger.debug("Data: %s", data)
             logger.warning("Erro de validação no modelo: %s", e)
             raise
 
