@@ -32,16 +32,18 @@ class GenericService:
         for field_name, field_type in hints.items():
             logger.debug("field_type: %s", field_type)
             logger.debug("field_name: %s", field_name)
-            logger.debug("data[field_name]: %s", data[field_name])
             if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
                 # Se o campo é uma submodel está presente nos dados
-                if field_name in data and issubclass(data[field_name], BaseModel):
+                await self.model.fetch_related(field_name)
+                related_obj = getattr(obj, field_name)
+                logger.debug("related_obj: %s", related_obj)
+                if field_name in data and issubclass(related_obj, BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
                         data.update(
                             {
                                 field_name: await self.serializer_obj(
-                                    obj=data[field_name], serializer=field_type
+                                    obj=related_obj, serializer=field_type
                                 )
                             }
                         )
