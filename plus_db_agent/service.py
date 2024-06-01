@@ -22,19 +22,21 @@ class GenericService:
     module_name = "base"
     serializer = Type[BaseSchema]
 
-    async def serializer_obj(
-        self, obj: BaseModel, serializer: BaseSchema
-    ) -> BaseSchema:
+    async def serializer_obj(self, obj: BaseModel, serializer: BaseSchema) -> dict:
         """Create a serializer object from a model object"""
         data = obj.__dict__.copy()
         hints = get_type_hints(serializer)
 
         for field_name, field_type in hints.items():
-            if isinstance(field_type, type) and issubclass(field_type, BaseSchema):
+            if (
+                isinstance(field_type, type)
+                and issubclass(field_type, BaseSchema)
+                and hasattr(obj, field_name)
+            ):
                 # Se o campo é uma submodel está presente nos dados
                 await obj.fetch_related(field_name)
                 related_obj = getattr(obj, field_name)
-                if hasattr(obj, field_name) and isinstance(related_obj, BaseModel):
+                if isinstance(related_obj, BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
                         data[field_name] = await self.serializer_obj(
@@ -47,15 +49,14 @@ class GenericService:
 
         try:
             # Cria um serializer da model principal a partir do dicionário
-            logger.debug("Data: %s", data)
             instance = serializer(**data)
         except ValidationError as e:
             logger.warning("Erro de validação no modelo: %s", e)
             raise
 
-        return instance
+        return instance.model_dump(by_alias=True)
 
-    async def serializer_list(self, objs: List[BaseModel]) -> List[BaseSchema]:
+    async def serializer_list(self, objs: List[BaseModel]) -> List[dict]:
         """Create a list of serializer objects from a list of model objects"""
         return [
             await self.serializer_obj(obj=obj, serializer=self.serializer)
