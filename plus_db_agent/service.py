@@ -34,7 +34,7 @@ class GenericService:
                 # Se o campo é uma submodel está presente nos dados
                 await obj.fetch_related(field_name)
                 related_obj = getattr(obj, field_name)
-                if field_name in data and issubclass(related_obj, BaseModel):
+                if hasattr(obj, field_name) and issubclass(related_obj, BaseModel):
                     try:
                         # Recursivamente cria uma serailzier da submodel
                         data[field_name] = await self.serializer_obj(
