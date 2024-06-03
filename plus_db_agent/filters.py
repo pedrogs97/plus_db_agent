@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Annotated, Optional, Union, get_type_hints
 
 from fastapi import Query
+from fastapi_pagination import Params, paginate
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ValidationInfo, field_validator
 from tortoise.expressions import Q
@@ -166,3 +167,10 @@ class PaginationFilter:
     ):
         self.page = page
         self.size = size
+
+    def paginate(self, query: Union[QuerySet, QuerySetSingle]):
+        """Paginate the query."""
+        return paginate(
+            query,
+            params=Params(page=self.page, size=self.size),
+        )

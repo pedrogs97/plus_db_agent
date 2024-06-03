@@ -4,7 +4,7 @@ from typing import List, Type, get_type_hints
 
 from fastapi import status
 from fastapi.exceptions import HTTPException
-from fastapi_pagination import Page, Params, paginate
+from fastapi_pagination import Page
 from pydantic import ValidationError
 
 from plus_db_agent.controller import GenericController
@@ -44,7 +44,7 @@ class GenericService:
                         )
                     except ValidationError as e:
                         logger.warning("Erro de validação no campo %s", field_name)
-                        logger.warning("Erro:", e)
+                        logger.warning("Erro: %s", e)
                         raise
 
         try:
@@ -74,16 +74,17 @@ class GenericService:
         return await self.serializer_obj(obj=obj, serializer=self.serializer)
 
     async def paginated_list(
-        self, list_filters: BaseFilter, page_filter: PaginationFilter
+        self,
+        list_filters: BaseFilter,
+        page_filter: PaginationFilter,
+        **kwargs,
     ) -> Page[BaseModel]:
         """List paginated objects"""
-        user_list = await list_filters.filter(self.model.filter(deleted=False))
-        user_list = await self.serializer_list(user_list.all())
-        paginated = paginate(
-            user_list,
-            params=Params(page=page_filter.page, size=page_filter.size),
+        user_list = await list_filters.filter(
+            self.model.filter(deleted=False, **kwargs)
         )
-        return paginated
+        user_list = await self.serializer_list(user_list.all())
+        return page_filter.paginate(user_list)
 
     async def list(self, **filters) -> List[BaseSchema]:
         """List objects"""
