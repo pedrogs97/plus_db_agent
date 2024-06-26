@@ -53,9 +53,11 @@ class SchedulerStatus(str, Enum):
     CONFIRMED - Confirmed
     CANCELED - Canceled
     DONE - Done
+    WAITING - Waiting
     """
 
     WAITING_CONFIRMATION = "WAITING_CONFIRMATION"
     CONFIRMED = "CONFIRMED"
     CANCELED = "CANCELED"
     DONE = "DONE"
+    WAITING = "WAITING"

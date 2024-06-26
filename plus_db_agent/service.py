@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException
 from fastapi_pagination import Page
 from pydantic import ValidationError
 
+from plus_db_agent.config import NOT_FOUND
 from plus_db_agent.controller import GenericController
 from plus_db_agent.filters import BaseFilter, PaginationFilter
 from plus_db_agent.logger import logger
@@ -63,12 +64,12 @@ class GenericService:
             for obj in objs
         ]
 
-    async def get_obj_or_404(self, pk: int) -> BaseModel:
+    async def get_obj_or_404(self, pk: int) -> dict:
         """Get an object by its id or raise a 404 error"""
         obj = await self.controller.get_obj_or_none(pk=pk)
         if not obj:
             raise HTTPException(
-                detail={"field": "id", "message": "Não encontrado"},
+                detail={"field": "id", "message": NOT_FOUND},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         return await self.serializer_obj(obj=obj, serializer=self.serializer)
@@ -86,12 +87,12 @@ class GenericService:
         user_list = await self.serializer_list(user_list.all())
         return page_filter.paginate(user_list)
 
-    async def list(self, **filters) -> List[BaseSchema]:
+    async def list(self, **filters) -> List[dict]:
         """List objects"""
         list_objs = await self.controller.list(**filters)
         return await self.serializer_list(objs=list_objs)
 
-    async def add(self, record: dict, authenticated_user: UserModel) -> BaseModel:
+    async def add(self, record: dict, authenticated_user: UserModel) -> dict:
         """Add an object"""
         obj_created: BaseModel = await self.controller.add(
             record=record, authenticated_user=authenticated_user
@@ -107,7 +108,7 @@ class GenericService:
         )
         if not obj_updated:
             raise HTTPException(
-                detail={"field": "id", "message": "Não encontrado"},
+                detail={"field": "id", "message": NOT_FOUND},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         return self.serializer_obj(obj_updated, self.serializer)
@@ -117,7 +118,7 @@ class GenericService:
         obj: BaseModel = await self.controller.get_obj_or_none(pk=pk)
         if not obj:
             raise HTTPException(
-                detail={"field": "id", "message": "Não encontrado"},
+                detail={"field": "id", "message": NOT_FOUND},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         await self.controller.delete(pk=obj.id, authenticated_user=authenticated_user)
@@ -128,12 +129,12 @@ class GenericService:
             record={"deleted": True}, pk=pk, authenticated_user=authenticated_user
         )
 
-    async def get_by_field(self, field: str, value: str) -> BaseModel:
+    async def get_by_field(self, field: str, value: str) -> dict:
         """Get an object by a field"""
         obj = await self.controller.get_by_field(field=field, value=value)
         if not obj:
             raise HTTPException(
-                detail={"field": field, "message": "Não encontrado"},
+                detail={"field": field, "message": NOT_FOUND},
                 status_code=status.HTTP_404_NOT_FOUND,
             )
         return await self.serializer_obj(obj=obj, serializer=self.serializer)

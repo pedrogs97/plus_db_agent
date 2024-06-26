@@ -10,6 +10,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DB_HOST = os.getenv("POSTGRESQL_HOST", "localhost")
 MODELS_MODULE = os.getenv("MODELS_MODULE", "models")
+NOT_FOUND = "Não encontrado"
 
 
 def get_database_url(test=False, sqlite=False):
