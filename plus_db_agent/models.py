@@ -376,7 +376,7 @@ class PlanModel(BaseModel):
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     observation = fields.TextField(null=True)
-    specialities = fields.ManyToManyField("core.SpecialtyModel", related_name="plans")
+    specialties = fields.ManyToManyField("core.SpecialtyModel", related_name="plans")
 
     def __str__(self):
         return self.name
