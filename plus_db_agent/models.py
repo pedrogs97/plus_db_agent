@@ -50,6 +50,7 @@ class UserModel(BaseModel):
         on_delete=fields.SET_NULL,
         null=True,
     )
+    licenses: fields.ReverseRelation["LicenseUserModel"]
 
     def __str__(self):
         return self.full_name
@@ -62,13 +63,13 @@ class ProfileModel(BaseModel):
     """Model to represent a profile."""
 
     name = fields.CharField(max_length=255)
-    clinic = fields.ForeignKeyField(
+    clinic: fields.ForeignKeyRelation["ClinicModel"] = fields.ForeignKeyField(
         "core.ClinicModel",
         related_name="profiles",
         on_delete=fields.NO_ACTION,
         null=True,
     )
-    permissions = fields.ManyToManyField(
+    permissions: fields.ManyToManyRelation["PermissionModel"] = fields.ManyToManyField(
         "core.PermissionModel", related_name="profiles"
     )
 
@@ -105,11 +106,6 @@ class ClinicModel(BaseModel):
         on_delete=fields.NO_ACTION,
         null=True,
     )
-    license: fields.ForeignKeyRelation["LicenseModel"] = fields.ForeignKeyField(
-        "core.LicenseModel",
-        related_name="clinics",
-        on_delete=fields.NO_ACTION,
-    )
     company_name = fields.CharField(max_length=255)
     company_register_number = fields.CharField(max_length=20)
     legal_entity = fields.BooleanField(default=False)
@@ -130,7 +126,7 @@ class TokenModel(BaseModel):
     """Model to represent a token."""
 
     token = fields.CharField(max_length=500)
-    user = fields.ForeignKeyField(
+    user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(
         "core.UserModel", related_name="tokens", on_delete=fields.CASCADE
     )
     refresh_token = fields.CharField(max_length=500)
@@ -161,12 +157,12 @@ class LicenseModel(BaseModel):
 class LicenseUserModel(BaseModel):
     """Model to represent the relationship between a license and a user."""
 
-    user = fields.ForeignKeyField(
+    user: fields.ForeignKeyRelation[UserModel] = fields.ForeignKeyField(
         "core.UserModel",
         related_name="licenses",
         on_delete=fields.NO_ACTION,
     )
-    license = fields.ForeignKeyField(
+    license: fields.ForeignKeyRelation[LicenseModel] = fields.ForeignKeyField(
         "core.LicenseModel",
         related_name="users",
         on_delete=fields.NO_ACTION,
@@ -187,7 +183,7 @@ class LicenseUserModel(BaseModel):
 class PaymentModel(BaseModel):
     """Model to represent a payment."""
 
-    license = fields.ForeignKeyField(
+    license: fields.ForeignKeyRelation[LicenseUserModel] = fields.ForeignKeyField(
         "core.LicenseUserModel",
         related_name="payments",
         on_delete=fields.NO_ACTION,
@@ -212,6 +208,8 @@ class PatientModel(BaseModel):
         enum_type=GenderEnum, max_length=1, default=GenderEnum.O
     )
     phone = fields.CharField(max_length=20, null=True)
+    treatments: fields.ReverseRelation["TreatmentPatientModel"]
+    urgencies: fields.ReverseRelation["UrgencyModel"]
 
     def __str__(self):
         return self.full_name
@@ -243,7 +241,7 @@ class DeskModel(BaseModel):
 class DocumentModel(BaseModel):
     """Model to represent a document."""
 
-    patient = fields.ForeignKeyField(
+    patient: fields.ForeignKeyRelation[PatientModel] = fields.ForeignKeyField(
         "core.PatientModel",
         related_name="documents",
         on_delete=fields.NO_ACTION,
@@ -279,12 +277,12 @@ class TreatmentModel(BaseModel):
 class TreatmentPatientModel(BaseModel):
     """Model to represent the relationship between a treatment and a patient."""
 
-    patient = fields.ForeignKeyField(
+    patient: fields.ForeignKeyRelation[PatientModel] = fields.ForeignKeyField(
         "core.PatientModel",
         related_name="treatments",
         on_delete=fields.NO_ACTION,
     )
-    treatment = fields.ForeignKeyField(
+    treatment: fields.ForeignKeyRelation[TreatmentModel] = fields.ForeignKeyField(
         "core.TreatmentModel",
         related_name="patients",
         on_delete=fields.NO_ACTION,
@@ -306,6 +304,11 @@ class UrgencyModel(BaseModel):
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     observation = fields.TextField(null=True)
+    patient: fields.ForeignKeyRelation[PatientModel] = fields.ForeignKeyField(
+        "core.PatientModel",
+        related_name="urgencies",
+        on_delete=fields.NO_ACTION,
+    )
     date = fields.DateField()
 
     def __str__(self):
@@ -322,6 +325,7 @@ class AnamnesisModel(BaseModel):
     number = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     observation = fields.TextField(null=True)
+    questions: fields.ReverseRelation["QuestionModel"]
 
     def __str__(self):
         return f"{self.name} - {self.number}"
@@ -333,7 +337,7 @@ class AnamnesisModel(BaseModel):
 class QuestionModel(BaseModel):
     """Model to represent a question."""
 
-    anamnesis = fields.ForeignKeyField(
+    anamnesis: fields.ForeignKeyRelation[AnamnesisModel] = fields.ForeignKeyField(
         "core.AnamnesisModel",
         related_name="questions",
         on_delete=fields.NO_ACTION,
@@ -351,12 +355,12 @@ class QuestionModel(BaseModel):
 class AnswerModel(BaseModel):
     """Model to represent an answer."""
 
-    question = fields.ForeignKeyField(
+    question: fields.ForeignKeyRelation[QuestionModel] = fields.ForeignKeyField(
         "core.QuestionModel",
         related_name="answers",
         on_delete=fields.NO_ACTION,
     )
-    patient = fields.ForeignKeyField(
+    patient: fields.ForeignKeyRelation[PatientModel] = fields.ForeignKeyField(
         "core.PatientModel",
         related_name="answers",
         on_delete=fields.NO_ACTION,
@@ -376,7 +380,9 @@ class PlanModel(BaseModel):
     name = fields.CharField(max_length=255)
     description = fields.TextField(null=True)
     observation = fields.TextField(null=True)
-    specialties = fields.ManyToManyField("core.SpecialtyModel", related_name="plans")
+    specialties: fields.ManyToManyRelation["SpecialtyModel"] = fields.ManyToManyField(
+        "core.SpecialtyModel", related_name="plans"
+    )
 
     def __str__(self):
         return self.name
@@ -401,12 +407,12 @@ class SpecialtyModel(BaseModel):
 class PlanTreatmentModel(BaseModel):
     """Model to represent the relationship between a plan and a treatment."""
 
-    plan = fields.ForeignKeyField(
+    plan: fields.ForeignKeyRelation[PlanModel] = fields.ForeignKeyField(
         "core.PlanModel",
         related_name="treatments",
         on_delete=fields.NO_ACTION,
     )
-    treatment = fields.ForeignKeyField(
+    treatment: fields.ForeignKeyRelation[TreatmentModel] = fields.ForeignKeyField(
         "core.TreatmentModel",
         related_name="plans",
         on_delete=fields.NO_ACTION,

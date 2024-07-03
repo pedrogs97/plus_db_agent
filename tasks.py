@@ -18,7 +18,7 @@ def migrate(cmd):
 @task
 def initdb(cmd):
     """Create the database tables."""
-    cmd.run("aerich init -t config.DATABASE_CONFIG")
+    cmd.run("aerich init -t plus_db_agent.config.DATABASE_CONFIG")
     cmd.run("aerich init-db")
 
 

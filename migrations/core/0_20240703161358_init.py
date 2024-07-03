@@ -3,7 +3,13 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "anamnesis" (
+        CREATE TABLE IF NOT EXISTS "aerich" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "version" VARCHAR(255) NOT NULL,
+    "app" VARCHAR(100) NOT NULL,
+    "content" JSONB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS "anamnesis" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -14,27 +20,6 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "observation" TEXT
 );
 COMMENT ON TABLE "anamnesis" IS 'Model to represent an anamnesis.';
-CREATE TABLE IF NOT EXISTS "desks" (
-    "id" BIGSERIAL NOT NULL PRIMARY KEY,
-    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "deleted" BOOL NOT NULL  DEFAULT False,
-    "number" VARCHAR(255) NOT NULL,
-    "vacancy" BOOL NOT NULL  DEFAULT True,
-    "capacity" INT NOT NULL  DEFAULT 1,
-    "observation" TEXT
-);
-COMMENT ON TABLE "desks" IS 'Model to represent a desk.';
-CREATE TABLE IF NOT EXISTS "licenses" (
-    "id" BIGSERIAL NOT NULL PRIMARY KEY,
-    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "deleted" BOOL NOT NULL  DEFAULT False,
-    "license_number" VARCHAR(20) NOT NULL,
-    "modules" VARCHAR(255) NOT NULL,
-    "value" DECIMAL(10,2) NOT NULL
-);
-COMMENT ON TABLE "licenses" IS 'Model to represent a license.';
 CREATE TABLE IF NOT EXISTS "clinics" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -46,10 +31,41 @@ CREATE TABLE IF NOT EXISTS "clinics" (
     "address" VARCHAR(255) NOT NULL,
     "subdomain" VARCHAR(255) NOT NULL UNIQUE,
     "logo_path" VARCHAR(255),
-    "head_quarter_id" BIGINT REFERENCES "clinics" ("id") ON DELETE NO ACTION,
-    "license_id" BIGINT NOT NULL REFERENCES "licenses" ("id") ON DELETE NO ACTION
+    "head_quarter_id" BIGINT REFERENCES "clinics" ("id") ON DELETE NO ACTION
 );
 COMMENT ON TABLE "clinics" IS 'Model to represent a clinic.';
+CREATE TABLE IF NOT EXISTS "desks" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "number" VARCHAR(255) NOT NULL,
+    "vacancy" BOOL NOT NULL  DEFAULT True,
+    "capacity" INT NOT NULL  DEFAULT 1,
+    "observation" TEXT
+);
+COMMENT ON TABLE "desks" IS 'Model to represent a desk.';
+CREATE TABLE IF NOT EXISTS "holidays" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "date" TIMESTAMPTZ NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "type" VARCHAR(100) NOT NULL,
+    "level" VARCHAR(100) NOT NULL
+);
+COMMENT ON TABLE "holidays" IS 'Model to represent a holiday.';
+CREATE TABLE IF NOT EXISTS "licenses" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "license_number" VARCHAR(20) NOT NULL,
+    "modules" VARCHAR(255) NOT NULL,
+    "value" DECIMAL(10,2) NOT NULL
+);
+COMMENT ON TABLE "licenses" IS 'Model to represent a license.';
 CREATE TABLE IF NOT EXISTS "patients" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -125,6 +141,24 @@ CREATE TABLE IF NOT EXISTS "answers" (
     "question_id" BIGINT NOT NULL REFERENCES "questions" ("id") ON DELETE NO ACTION
 );
 COMMENT ON TABLE "answers" IS 'Model to represent an answer.';
+CREATE TABLE IF NOT EXISTS "schedulers" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "status" VARCHAR(20) NOT NULL  DEFAULT 'WAITING_CONFIRMATION',
+    "date" TIMESTAMPTZ NOT NULL,
+    "description" TEXT,
+    "is_return" BOOL NOT NULL  DEFAULT False,
+    "is_off" BOOL NOT NULL  DEFAULT False,
+    "off_reason" TEXT,
+    "clinic_id" BIGINT NOT NULL,
+    "patient" VARCHAR(150) NOT NULL,
+    "user" VARCHAR(150) NOT NULL,
+    "desk" VARCHAR(150) NOT NULL
+);
+COMMENT ON COLUMN "schedulers"."status" IS 'WAITING_CONFIRMATION: WAITING_CONFIRMATION\nCONFIRMED: CONFIRMED\nCANCELED: CANCELED\nDONE: DONE\nWAITING: WAITING';
+COMMENT ON TABLE "schedulers" IS 'Model to represent a scheduler.';
 CREATE TABLE IF NOT EXISTS "specialties" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -177,7 +211,8 @@ CREATE TABLE IF NOT EXISTS "urgencies" (
     "name" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "observation" TEXT,
-    "date" DATE NOT NULL
+    "date" DATE NOT NULL,
+    "patient_id" BIGINT NOT NULL REFERENCES "patients" ("id") ON DELETE NO ACTION
 );
 COMMENT ON TABLE "urgencies" IS 'Model to represent an urgency.';
 CREATE TABLE IF NOT EXISTS "users" (
@@ -251,12 +286,6 @@ CREATE TABLE IF NOT EXISTS "tokens" (
     "user_id" BIGINT NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE
 );
 COMMENT ON TABLE "tokens" IS 'Model to represent a token.';
-CREATE TABLE IF NOT EXISTS "aerich" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "version" VARCHAR(255) NOT NULL,
-    "app" VARCHAR(100) NOT NULL,
-    "content" JSONB NOT NULL
-);
 CREATE TABLE IF NOT EXISTS "plans_specialties" (
     "plans_id" BIGINT NOT NULL REFERENCES "plans" ("id") ON DELETE CASCADE,
     "specialtymodel_id" BIGINT NOT NULL REFERENCES "specialties" ("id") ON DELETE CASCADE
