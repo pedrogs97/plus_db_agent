@@ -210,6 +210,7 @@ class PatientModel(BaseModel):
     phone = fields.CharField(max_length=20, null=True)
     treatments: fields.ReverseRelation["TreatmentPatientModel"]
     urgencies: fields.ReverseRelation["UrgencyModel"]
+    documents: fields.ReverseRelation["DocumentModel"]
 
     def __str__(self):
         return self.full_name
