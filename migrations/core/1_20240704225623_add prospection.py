@@ -3,7 +3,15 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "prospections" (
+CREATE TABLE IF NOT EXISTS "prospections_stages" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "name" VARCHAR(255) NOT NULL,
+    "color" VARCHAR(7) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS "prospections" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -16,14 +24,6 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "stage_id" BIGINT NOT NULL REFERENCES "prospections_stages" ("id") ON DELETE NO ACTION
 );
 COMMENT ON TABLE "prospections" IS 'Model to represent a prospection.';
-        CREATE TABLE IF NOT EXISTS "prospections_stages" (
-    "id" BIGSERIAL NOT NULL PRIMARY KEY,
-    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "deleted" BOOL NOT NULL  DEFAULT False,
-    "name" VARCHAR(255) NOT NULL,
-    "color" VARCHAR(7) NOT NULL
-);
 COMMENT ON TABLE "prospections_stages" IS 'Model to represent a prospection stage.';"""
 
 
