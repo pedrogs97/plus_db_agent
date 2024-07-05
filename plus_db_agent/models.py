@@ -486,3 +486,39 @@ class HolidayModel(BaseModel):
 
     class Meta:
         table = "holidays"
+
+
+class ProspectionStageModel(BaseModel):
+    """Model to represent a prospection stage."""
+
+    name = fields.CharField(max_length=255)
+    color = fields.CharField(max_length=7)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        table = "prospections_stages"
+
+
+class ProspectionModel(BaseModel):
+    """Model to represent a prospection."""
+
+    full_name = fields.CharField(max_length=255)
+    phone = fields.CharField(max_length=20)
+    email = fields.CharField(max_length=255)
+    observation = fields.TextField(null=True)
+    clinic: fields.ForeignKeyRelation[ClinicModel] = fields.ForeignKeyField(
+        "core.ClinicModel", related_name="prospections", on_delete=fields.NO_ACTION
+    )
+    stage: fields.ForeignKeyRelation[ProspectionStageModel] = fields.ForeignKeyField(
+        "core.ProspectionStageModel",
+        related_name="prospections",
+        on_delete=fields.NO_ACTION,
+    )
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        table = "prospections"
