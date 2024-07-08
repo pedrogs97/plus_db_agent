@@ -508,6 +508,10 @@ class ProspectionModel(BaseModel):
     phone = fields.CharField(max_length=20)
     email = fields.CharField(max_length=255)
     observation = fields.TextField(null=True)
+    gender = fields.CharEnumField(
+        enum_type=GenderEnum, max_length=1, default=GenderEnum.O
+    )
+    birth_date = fields.DateField(null=True)
     clinic: fields.ForeignKeyRelation[ClinicModel] = fields.ForeignKeyField(
         "core.ClinicModel", related_name="prospections", on_delete=fields.NO_ACTION
     )
@@ -522,3 +526,8 @@ class ProspectionModel(BaseModel):
 
     class Meta:
         table = "prospections"
+
+    @property
+    def age(self):
+        """Calculate the age of the patient."""
+        return (datetime.date.today() - self.birth_date).days // 365
