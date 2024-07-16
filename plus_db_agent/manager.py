@@ -3,6 +3,7 @@
 import os
 
 from tortoise import Tortoise, connections
+from tortoise.exceptions import OperationalError
 
 from plus_db_agent.config import DATABASE_CONFIG, bcrypt_context
 from plus_db_agent.logger import logger
@@ -46,5 +47,5 @@ async def init():
     try:
         logger.info("Trying create superuser")
         await __create_superuser()
-    finally:
+    except OperationalError:
         ...
