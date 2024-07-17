@@ -25,7 +25,9 @@ async def __create_superuser():
             "subdomain": "teste",
         }
     )
-    profile_manager, _ = await ProfileModel.get_or_create(defaults={"name": "Manager"})
+    profile_manager, _ = await ProfileModel.get_or_create(
+        defaults={"name": "Manager", "clinic_id": clinic.id}
+    )
     await UserModel.get_or_create(
         defaults={
             "full_name": os.getenv("DEFAULT_SUPERUSER_FULL_NAME", "Test User"),
