@@ -121,6 +121,31 @@ CREATE TABLE IF NOT EXISTS "profiles" (
     "clinic_id" BIGINT REFERENCES "clinics" ("id") ON DELETE NO ACTION
 );
 COMMENT ON TABLE "profiles" IS 'Model to represent a profile.';
+CREATE TABLE IF NOT EXISTS "prospections_stages" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "name" VARCHAR(255) NOT NULL,
+    "color" VARCHAR(7) NOT NULL
+);
+COMMENT ON TABLE "prospections_stages" IS 'Model to represent a prospection stage.';
+CREATE TABLE IF NOT EXISTS "prospections" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "deleted" BOOL NOT NULL  DEFAULT False,
+    "full_name" VARCHAR(255) NOT NULL,
+    "phone" VARCHAR(20) NOT NULL,
+    "email" VARCHAR(255) NOT NULL,
+    "observation" TEXT,
+    "gender" VARCHAR(1) NOT NULL  DEFAULT 'O',
+    "birth_date" DATE,
+    "clinic_id" BIGINT NOT NULL REFERENCES "clinics" ("id") ON DELETE NO ACTION,
+    "stage_id" BIGINT NOT NULL REFERENCES "prospections_stages" ("id") ON DELETE NO ACTION
+);
+COMMENT ON COLUMN "prospections"."gender" IS 'M: M\nF: F\nO: O';
+COMMENT ON TABLE "prospections" IS 'Model to represent a prospection.';
 CREATE TABLE IF NOT EXISTS "questions" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,

@@ -10,6 +10,7 @@ bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DB_HOST = os.getenv("POSTGRESQL_HOST", "localhost")
 MODELS_MODULE = os.getenv("MODELS_MODULE", "models")
+DEBUG = os.getenv("DEBUG")
 NOT_FOUND = "Não encontrado"
 
 

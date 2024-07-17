@@ -5,9 +5,9 @@ import os
 from tortoise import Tortoise, connections
 from tortoise.exceptions import OperationalError
 
-from plus_db_agent.config import DATABASE_CONFIG, bcrypt_context
+from plus_db_agent.config import DATABASE_CONFIG, DEBUG, bcrypt_context
 from plus_db_agent.logger import logger
-from plus_db_agent.models import ProfileModel, UserModel
+from plus_db_agent.models import ClinicModel, ProfileModel, UserModel
 
 
 def hash_password(password: str) -> str:
@@ -17,6 +17,14 @@ def hash_password(password: str) -> str:
 
 async def __create_superuser():
     """Create a test user"""
+    clinic, _ = await ClinicModel.get_or_create(
+        defaults={
+            "company_name": "Clinic Test",
+            "company_register_number": "97.169.561/0001-50",
+            "address": "Rua Teste, 123",
+            "subdomain": "teste",
+        }
+    )
     profile_manager, _ = await ProfileModel.get_or_create(defaults={"name": "Manager"})
     await UserModel.get_or_create(
         defaults={
@@ -28,6 +36,7 @@ async def __create_superuser():
             "username": os.getenv("DEFAULT_SUPERUSER_USERNAME", "test"),
             "is_superuser": True,
             "profile_id": profile_manager.id,
+            "clinic_id": clinic.id,
         }
     )
 
@@ -45,7 +54,9 @@ async def init():
     await Tortoise.init(config=DATABASE_CONFIG)
     # await Tortoise.generate_schemas()
     try:
-        logger.info("Trying create superuser")
-        await __create_superuser()
-    except OperationalError:
-        ...
+        if DEBUG:
+            logger.info("Trying create superuser")
+            await __create_superuser()
+    except OperationalError as err:
+        if DEBUG:
+            logger.info("Error creating superuser: %s", err)
