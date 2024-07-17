@@ -106,6 +106,7 @@ class ClinicModel(BaseModel):
         on_delete=fields.NO_ACTION,
         null=True,
     )
+    subsidiaries: fields.ReverseRelation["ClinicModel"]
     company_name = fields.CharField(max_length=255)
     company_register_number = fields.CharField(max_length=20)
     legal_entity = fields.BooleanField(default=False)
