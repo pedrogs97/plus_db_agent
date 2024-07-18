@@ -102,12 +102,11 @@ class ClinicModel(BaseModel):
 
     head_quarter: fields.ForeignKeyRelation["ClinicModel"] = fields.ForeignKeyField(
         "core.ClinicModel",
-        related_name="subsidiaries",
+        related_name="clinics",
         on_delete=fields.NO_ACTION,
         null=True,
     )
     clinics: fields.ReverseRelation["ClinicModel"]
-    subsidiaries: fields.ReverseRelation["ClinicModel"]
     company_name = fields.CharField(max_length=255)
     company_register_number = fields.CharField(max_length=20)
     legal_entity = fields.BooleanField(default=False)
