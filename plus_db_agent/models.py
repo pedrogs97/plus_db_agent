@@ -100,14 +100,8 @@ class PermissionModel(BaseModel):
 class ClinicModel(BaseModel):
     """Model to represent a clinic."""
 
-    head_quarter: fields.ForeignKeyRelation["ClinicModel"] = fields.ForeignKeyField(
-        "core.ClinicModel",
-        related_name="subsidiaries",
-        on_delete=fields.NO_ACTION,
-        null=True,
-    )
-    clinics: fields.ReverseRelation["ClinicModel"]
-    subsidiaries: fields.ReverseRelation["ClinicModel"]
+    head_quarter_id = fields.BigIntField(null=True)
+
     company_name = fields.CharField(max_length=255)
     company_register_number = fields.CharField(max_length=20)
     legal_entity = fields.BooleanField(default=False)
