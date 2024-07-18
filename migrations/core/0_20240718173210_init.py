@@ -30,8 +30,7 @@ CREATE TABLE IF NOT EXISTS "clinics" (
     "legal_entity" BOOL NOT NULL  DEFAULT False,
     "address" VARCHAR(255) NOT NULL,
     "subdomain" VARCHAR(255) NOT NULL UNIQUE,
-    "logo_path" VARCHAR(255),
-    "head_quarter_id" BIGINT REFERENCES "clinics" ("id") ON DELETE NO ACTION
+    "logo_path" VARCHAR(255)
 );
 COMMENT ON TABLE "clinics" IS 'Model to represent a clinic.';
 CREATE TABLE IF NOT EXISTS "desks" (
