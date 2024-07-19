@@ -25,10 +25,8 @@ async def __create_superuser():
             "subdomain": "teste",
         }
     )
-    logger.debug(clinic)
     profile_manager, _ = await ProfileModel.get_or_create(
-        defaults={"name": "Manager"}
-        # defaults={"name": "Manager", "clinic": clinic}
+        defaults={"name": "Manager", "clinic_id": clinic.id}
     )
     await UserModel.get_or_create(
         defaults={
@@ -40,7 +38,7 @@ async def __create_superuser():
             "username": os.getenv("DEFAULT_SUPERUSER_USERNAME", "test"),
             "is_superuser": True,
             "profile_id": profile_manager.id,
-            # "clinic_id": clinic.id,
+            "clinic_id": clinic.id,
         }
     )
 
