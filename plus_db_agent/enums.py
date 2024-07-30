@@ -61,3 +61,13 @@ class SchedulerStatus(str, Enum):
     CANCELED = "CANCELED"
     DONE = "DONE"
     WAITING = "WAITING"
+
+
+class BaseMessageType(int, Enum):
+    """Base message Type Enum"""
+
+    CONNECTION = 7
+    CREATE_UUID = 8
+    INVALID = 9
+    ERROR = 10
+    DISCONNECT = 11
