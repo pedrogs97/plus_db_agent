@@ -1,5 +1,6 @@
 """Connection Manager Module"""
 
+import abc
 import asyncio
 import json
 import time
@@ -16,7 +17,6 @@ from plus_db_agent.enums import BaseMessageType
 from plus_db_agent.logger import logger
 from plus_db_agent.schemas import (
     BaseSchema,
-    ConnectionSchema,
     CreateUUIDSchema,
     ErrorResponseSchema,
     Message,
@@ -157,27 +157,9 @@ class BaseConnectionManager:
         except WebSocketDisconnect:
             await self.disconnect(websocket_client)
 
-    async def __process_connection(self, message: Message, client: BaseClientWebSocket):
+    @abc.abstractmethod
+    async def process_connection(self, message: Message, client: BaseClientWebSocket):
         """Process connection"""
-        try:
-            if (
-                not isinstance(message.data, ConnectionSchema)
-                or message.data.uuid != client.uuid
-            ):
-                await client.send_invalid_message()
-                return
-            client.token = message.data.token
-            client.clinic_id = message.data.clinic_id
-            await client.send(
-                Message(
-                    message_type=BaseMessageType.CONNECTION,
-                    clinic_id=message.data.clinic_id,
-                )
-            )
-        except (OperationalError, AttributeError):
-            await client.send_error_message("Erro ao validar conexão")
-            time.sleep(0.1)
-            await self.disconnect(client)
 
     async def __process_message(
         self, message: Message, client: BaseClientWebSocket
@@ -185,7 +167,7 @@ class BaseConnectionManager:
         """Process message"""
         try:
             if message.message_type == BaseMessageType.CONNECTION:
-                await self.__process_connection(message, client)
+                await self.process_connection(message, client)
             elif not client.token:
                 await client.send_error_message("Token inválido")
                 time.sleep(0.1)
