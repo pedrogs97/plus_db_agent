@@ -37,13 +37,11 @@ class BaseClientWebSocket:
 
     async def accept(
         self,
-        client_id: Union[int, None] = None,
         uuid_code: Union[str, None] = None,
     ) -> None:
         """Accept connection"""
-        if client_id is None or uuid_code is None:
+        if uuid_code is None:
             return await self.send_error_message("Client ID ou UUID não informado")
-        self.clinic_id = client_id
         self.uuid = uuid_code
         await self.wb.accept()
 
@@ -99,11 +97,11 @@ class BaseConnectionManager:
             cls._instance = super(BaseConnectionManager, cls).__new__(cls)
         return cls._instance
 
-    async def connect(self, websocket: WebSocket, clinic_id: int):
+    async def connect(self, websocket: WebSocketDisconnect):
         """Add a new client connection to the list on connect"""
         client_websocket = BaseClientWebSocket(wb=websocket)
         new_uuid = uuid.uuid4().hex
-        await client_websocket.accept(client_id=clinic_id, uuid_code=new_uuid)
+        await client_websocket.accept(uuid_code=new_uuid)
         await client_websocket.send_new_uuid(new_uuid)
         self.client_connections.append(client_websocket)
         await self.__listenner(client_websocket)
@@ -155,15 +153,19 @@ class BaseConnectionManager:
                     await websocket_client.send_invalid_message()
                     continue
         except WebSocketDisconnect:
-            self.disconnect(websocket_client)
+            await self.disconnect(websocket_client)
 
     async def __process_connection(self, message: Message, client: BaseClientWebSocket):
         """Process connection"""
         try:
-            if not isinstance(message.data, ConnectionSchema):
+            if (
+                not isinstance(message.data, ConnectionSchema)
+                or message.data.uuid != client.uuid
+            ):
                 await client.send_invalid_message()
                 return
             client.token = message.data.token
+            client.clinic_id = message.data.clinic_id
             await client.send(
                 Message(
                     message_type=BaseMessageType.CONNECTION,

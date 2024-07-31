@@ -17,6 +17,8 @@ class ConnectionSchema(BaseSchema):
     """Connection Schema"""
 
     token: str
+    uuid: str
+    clinic_id: int = Field(alias="clinicId")
 
 
 class CreateUUIDSchema(BaseSchema):
@@ -35,7 +37,7 @@ class Message(BaseSchema):
     """Message Schema"""
 
     message_type: BaseMessageType = Field(alias="messageType")
-    clinic_id: int = Field(alias="clinicId")
+    clinic_id: Optional[int] = Field(alias="clinicId")
     data: Optional[
         Union[
             ConnectionSchema,
