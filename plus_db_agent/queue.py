@@ -27,7 +27,7 @@ class BaseClientWebSocket:
     """Custom BaseClientWebSocket"""
 
     token: Optional[str] = None
-    clinic_id: int
+    clinic_id: Optional[int] = None
     uuid: str
     user_id: Optional[int] = None
     wb: WebSocket
@@ -48,7 +48,9 @@ class BaseClientWebSocket:
     async def send_invalid_message(self) -> None:
         """Send invalid message"""
         await self.send(
-            Message(messageType=BaseMessageType.INVALID, clinicId=self.clinic_id)
+            Message(
+                messageType=BaseMessageType.INVALID, clinicId=self.clinic_id or None
+            )
         )
 
     async def send_error_message(self, error: str) -> None:
@@ -56,7 +58,7 @@ class BaseClientWebSocket:
         await self.send(
             Message(
                 messageType=BaseMessageType.ERROR,
-                clinicId=self.clinic_id,
+                clinicId=self.clinic_id or None,
                 data=ErrorResponseSchema(error=error),
             )
         )
@@ -66,7 +68,7 @@ class BaseClientWebSocket:
         await self.send(
             Message(
                 messageType=BaseMessageType.CREATE_UUID,
-                clinicId=self.clinic_id,
+                clinicId=self.clinic_id or None,
                 data=CreateUUIDSchema(uuid=uuid_code),
             )
         )
@@ -169,7 +171,7 @@ class BaseConnectionManager:
             await client.send(
                 Message(
                     message_type=BaseMessageType.CONNECTION,
-                    clinic_id=message.clinic_id,
+                    clinic_id=message.data.clinic_id,
                 )
             )
         except (OperationalError, AttributeError):
@@ -198,7 +200,8 @@ class BaseConnectionManager:
             if not self.queue.empty():
                 websocket, message = await self.queue.get()
                 logger.info("Processing message: %s", message.message_type)
-                await self.__process_message(message, websocket)
+                if message.clinic_id == websocket.clinic_id:
+                    await self.__process_message(message, websocket)
             await asyncio.sleep(1)
 
     def __start_queue_processor(self):
